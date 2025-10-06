@@ -1,7 +1,60 @@
-local mikeDonaldPart = script.Parent
-local humanoid = mikeDonaldPart:FindFirstChildOfClass("Humanoid")
-local hrp = mikeDonaldPart:FindFirstChild("HumanoidRootPart")
-if not humanoid or not hrp then return end
+local model = script.Parent
+
+local function ensureModelForNPC(model)
+    for _, d in ipairs(model:GetDescendants()) do
+        if d:IsA("BasePart") then
+            d.Anchored = false
+        end
+    end
+
+    local humanoid = model:FindFirstChildOfClass("Humanoid")
+    local hrp = model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart
+
+    if not hrp then
+        local biggest, maxVol = nil, 0
+        for _, p in ipairs(model:GetDescendants()) do
+            if p:IsA("BasePart") then
+                local vol = p.Size.X * p.Size.Y * p.Size.Z
+                if vol > maxVol then
+                    biggest = p
+                    maxVol = vol
+                end
+            end
+        end
+        if biggest then
+            hrp = Instance.new("Part")
+            hrp.Name = "HumanoidRootPart"
+            hrp.Size = Vector3.new(2, 2, 1)
+            hrp.Transparency = 1
+            hrp.CanCollide = false
+            hrp.Anchored = false
+            hrp.CFrame = biggest.CFrame
+            hrp.Parent = model
+            local weld = Instance.new("WeldConstraint")
+            weld.Part0 = hrp
+            weld.Part1 = biggest
+            weld.Parent = hrp
+        end
+    end
+
+    if not humanoid and hrp then
+        humanoid = Instance.new("Humanoid")
+        humanoid.Parent = model
+    end
+
+    if hrp and not model.PrimaryPart then
+        model.PrimaryPart = hrp
+    end
+
+    return humanoid, hrp
+end
+
+local mikeDonaldPart = model
+local humanoid, hrp = ensureModelForNPC(model)
+if not humanoid or not hrp then
+    warn("No se pudo preparar el modelo para NPC (falta Humanoid o HumanoidRootPart).")
+    return
+end
 local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 local function getNearestPlayer()
