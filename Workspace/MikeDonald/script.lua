@@ -119,7 +119,7 @@ spawn(function()
                     path:ComputeAsync(hrp.Position, targetPos)
                 end)
                 if not ok then
-                    warn("Error computing path: " err)
+                    warn("Error computing path: " ..tostring(err))
                     humanoid:MoveTo(targetPos)
                     humanoid.MoveToFinished:Wait()
                     if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
