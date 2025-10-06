@@ -93,7 +93,7 @@ local function attackPlayer(player)
     local targetHumanoid = player.Character:FindFirstChildOfClass("Humanoid")
     local targetHrp = player.Character:FindFirstChild("HumanoidRootPart")
     if not targetHumanoid or not targetHrp then return end
-    if (hrp.Position - targetHrp.Position).Magnitude > 3 then
+    if (hrp.Position - targetHrp.Position).Magnitude > 5 then
         return
     end
     if not canAttack(player) then return end
@@ -108,7 +108,7 @@ spawn(function()
         wait(0.5)
         local player, dist = getNearestPlayer()
         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            if dist and dist < 3 then
+            if dist and dist < 5 then
                 attackPlayer(player)
                 continue
             end
@@ -123,7 +123,7 @@ spawn(function()
                     humanoid:MoveTo(targetPos)
                     humanoid.MoveToFinished:Wait()
                     if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 3 then
+                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 5 then
                             attackPlayer(player)
                         end
                     end
@@ -134,9 +134,8 @@ spawn(function()
                         if humanoid.Health <= 0 then return end
                         if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then break end
                         local targetHrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                        if targetHrp and (hrp.Position - targetHrp.Position).Magnitude < 3 then
+                        if targetHrp and (hrp.Position - targetHrp.Position).Magnitude < 5 then
                             attackPlayer(player)
-                            break
                         end
                         if waypoint.Action == Enum.PathWaypointAction.Jump then
                             humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -146,9 +145,8 @@ spawn(function()
                         local reached = humanoid.MoveToFinished:Wait()
                         if not reached then break end
                         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                            if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 3 then
+                            if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 5 then
                                 attackPlayer(player)
-                                break
                             end
                         end
                     end
@@ -156,7 +154,7 @@ spawn(function()
                     humanoid:MoveTo(targetPos)
                     humanoid.MoveToFinished:Wait()
                     if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 3 then
+                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 5 then
                             attackPlayer(player)
                         end
                     end
