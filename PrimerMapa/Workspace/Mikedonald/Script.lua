@@ -74,9 +74,12 @@ local footstepSound = createFootstepSound()
 
 local runningConn
 runningConn = humanoid.Running:Connect(function(speed)
-    if speed and speed > 1 then
-        if not footstepSound.IsPlaying then
+    if speed and speed > 0 then
+        if footstepSound and not footstepSound.IsPlaying then
             footstepSound:Play()
+        end
+        if footstepSound then
+            footstepSound.PlaybackSpeed = math.clamp(speed / 16, 0.6, 1.6)
         end
     else
         if footstepSound.IsPlaying then
