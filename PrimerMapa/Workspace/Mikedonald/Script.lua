@@ -58,6 +58,34 @@ end
 local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 humanoid.WalkSpeed = 50
+local FOOTSTEP_SOUND_ID = "rbxassetid://15490513000"
+local footstepSound = hrp:FindFirstChild("FootstepSound")
+if not footstepSound then
+    footstepSound = Instance.new("Sound")
+    footstepSound.Name = "FootstepSound"
+    footstepSound.SoundId = FOOTSTEP_SOUND_ID
+    footstepSound.Volume = 1
+    footstepSound.Looped = true
+    footstepSound.PlaybackSpeed = 1
+    footstepSound.Parent = hrp
+end
+local runningConn
+runningConn = humanoid.Running:Connect(function(speed)
+    if speed and speed > 1 then
+        if not footstepSound.IsPlaying then
+            footstepSound:Play()
+        end
+    else
+        if footstepSound.IsPlaying then
+            footstepSound:Stop()
+        end
+    end
+end)
+humanoid.Died:Connect(function()
+    if footstepSound.IsPlaying then footstepSound:Stop() end
+    if runningConn then runningConn:Disconnect() end
+end)
+
 local function getNearestPlayer()
     local nearestPlayer
     local nearestDistance = math.huge
@@ -93,7 +121,7 @@ local function attackPlayer(player)
     local targetHumanoid = player.Character:FindFirstChildOfClass("Humanoid")
     local targetHrp = player.Character:FindFirstChild("HumanoidRootPart")
     if not targetHumanoid or not targetHrp then return end
-    if (hrp.Position - targetHrp.Position).Magnitude > 5 then
+    if (hrp.Position - targetHrp.Position).Magnitude > 6 then
         return
     end
     if not canAttack(player) then return end
@@ -108,7 +136,7 @@ spawn(function()
         wait(0.5)
         local player, dist = getNearestPlayer()
         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            if dist and dist < 5 then
+            if dist and dist < 6 then
                 attackPlayer(player)
                 continue
             end
@@ -123,7 +151,7 @@ spawn(function()
                     humanoid:MoveTo(targetPos)
                     humanoid.MoveToFinished:Wait()
                     if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 5 then
+                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 6 then
                             attackPlayer(player)
                         end
                     end
@@ -134,7 +162,7 @@ spawn(function()
                         if humanoid.Health <= 0 then return end
                         if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then break end
                         local targetHrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                        if targetHrp and (hrp.Position - targetHrp.Position).Magnitude < 5 then
+                        if targetHrp and (hrp.Position - targetHrp.Position).Magnitude < 6 then
                             attackPlayer(player)
                         end
                         if waypoint.Action == Enum.PathWaypointAction.Jump then
@@ -145,7 +173,7 @@ spawn(function()
                         local reached = humanoid.MoveToFinished:Wait()
                         if not reached then break end
                         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                            if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 5 then
+                            if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 6 then
                                 attackPlayer(player)
                             end
                         end
@@ -154,7 +182,7 @@ spawn(function()
                     humanoid:MoveTo(targetPos)
                     humanoid.MoveToFinished:Wait()
                     if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 5 then
+                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 6 then
                             attackPlayer(player)
                         end
                     end
