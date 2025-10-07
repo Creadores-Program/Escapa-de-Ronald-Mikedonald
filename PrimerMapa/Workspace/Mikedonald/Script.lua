@@ -129,7 +129,7 @@ local function attackPlayer(player)
     local targetHumanoid = player.Character:FindFirstChildOfClass("Humanoid")
     local targetHrp = player.Character:FindFirstChild("HumanoidRootPart")
     if not targetHumanoid or not targetHrp then return end
-    if (hrp.Position - targetHrp.Position).Magnitude > 6 then
+    if (hrp.Position - targetHrp.Position).Magnitude > 7 then
         return
     end
     if not canAttack(player) then return end
@@ -139,63 +139,129 @@ local function attackPlayer(player)
     end
 end
 
-spawn(function()
-    while true do
-        wait(0.5)
-        local player, dist = getNearestPlayer()
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            if dist and dist < 6 then
-                attackPlayer(player)
-                continue
-            end
-            if dist and dist < 200 then
-                local targetPos = player.Character.HumanoidRootPart.Position
-                local path = PathfindingService:CreatePath({ AgentRadius = 2, AgentHeight = 5, AgentCanJump = true})
-                local ok, err = pcall(function()
-                    path:ComputeAsync(hrp.Position, targetPos)
-                end)
-                if not ok then
-                    warn("Error computing path: " ..tostring(err))
-                    humanoid:MoveTo(targetPos)
-                    humanoid.MoveToFinished:Wait()
-                    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 6 then
-                            attackPlayer(player)
-                        end
-                    end
-                    continue
-                end
-                if path.Status == Enum.PathStatus.Success then
-                    for _, waypoint in ipairs(path:GetWaypoints()) do
-                        if humanoid.Health <= 0 then return end
-                        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then break end
-                        local targetHrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                        if targetHrp and (hrp.Position - targetHrp.Position).Magnitude < 6 then
-                            attackPlayer(player)
-                        end
-                        if waypoint.Action == Enum.PathWaypointAction.Jump then
-                            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                        end
+local REPATH_INTERVAL = 0.5
+local WAYPOINT_TIMEOUT = 1.2
+local STUCK_DIST = 0.6
+local GOAL_BUFFER = 2
+local CHASE_MAX_DISTANCE = 250
+local ATTACK_DISTANCE = 7
 
-                        humanoid:MoveTo(waypoint.Position)
-                        local reached = humanoid.MoveToFinished:Wait()
-                        if not reached then break end
-                        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                            if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 6 then
-                                attackPlayer(player)
-                            end
-                        end
-                    end
-                else
-                    humanoid:MoveTo(targetPos)
-                    humanoid.MoveToFinished:Wait()
-                    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude < 6 then
-                            attackPlayer(player)
-                        end
+local function getOffsetTarget(hrpPos, targetPos)
+    local dir = targetPos - hrpPos
+    local mag = dir.Magnitude
+    if mag < 0.5 then return targetPos end
+    local offsetDist = math.clamp(GOAL_BUFFER, 0, mag - 0.5)
+    return targetPos - dir.Unit * offsetDist
+end
+
+local function followPlayerLoop()
+    while humanoid and humanoid.Health > 0 do
+        wait(REPATH_INTERVAL)
+
+        local player, dist = getNearestPlayer()
+        if not player or not player.Character then
+            continue
+        end
+        local targetHrp = player.Character:FindFirstChild("HumanoidRootPart")
+        if not targetHrp then
+            continue
+        end
+
+        if dist and dist <= ATTACK_DISTANCE then
+            attackPlayer(player)
+            continue
+        end
+
+        if not dist or dist > CHASE_MAX_DISTANCE then
+            continue
+        end
+
+        local aimPos = getOffsetTarget(hrp.Position, targetHrp.Position)
+        local path = PathfindingService:CreatePath({
+            AgentRadius = 2,
+            AgentHeight = 5,
+            AgentCanJump = true,
+        })
+
+        local ok, err = pcall(function()
+            path:ComputeAsync(hrp.Position, aimPos)
+        end)
+        if not ok or path.Status ~= Enum.PathStatus.Success then
+            humanoid:MoveTo(aimPos)
+            local t0 = tick()
+            local moved = false
+            local before = hrp.Position
+            while tick() - t0 < WAYPOINT_TIMEOUT do
+                wait(0.12)
+                if (hrp.Position - aimPos).Magnitude < 1.5 then
+                    moved = true
+                    break
+                end
+                if (hrp.Position - before).Magnitude > STUCK_DIST then
+                    moved = true
+                    break
+                end
+            end
+            if not moved then
+                local dir = aimPos - hrp.Position
+                if dir.Magnitude > 0 then
+                    local sidestep = hrp.Position + Vector3.new(-dir.Z, 0, dir.X).Unit * 2
+                    humanoid:MoveTo(sidestep)
+                    wait(0.35)
+                end
+            end
+            continue
+        end
+
+        local waypoints = path:GetWaypoints()
+        for i, wp in ipairs(waypoints) do
+            if humanoid.Health <= 0 then return end
+            if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then break end
+
+            local wpPos = wp.Position
+            if i == #waypoints then
+                wpPos = getOffsetTarget(hrp.Position, player.Character.HumanoidRootPart.Position)
+            end
+
+            if wp.Action == Enum.PathWaypointAction.Jump then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+
+            local before = hrp.Position
+            humanoid:MoveTo(wpPos)
+
+            local t0 = tick()
+            local reached = false
+            while tick() - t0 < WAYPOINT_TIMEOUT do
+                wait(0.12)
+                if (hrp.Position - wpPos).Magnitude < 1.2 then
+                    reached = true
+                    break
+                end
+                if (hrp.Position - before).Magnitude > STUCK_DIST then
+                    reached = true
+                    break
+                end
+                if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    if (hrp.Position - player.Character.HumanoidRootPart.Position).Magnitude <= ATTACK_DISTANCE then
+                        attackPlayer(player)
+                        reached = true
+                        break
                     end
                 end
+            end
+
+            if not reached then
+                local lateral = (wpPos - hrp.Position)
+                if lateral.Magnitude > 0 then
+                    local sidestep = hrp.Position + Vector3.new(-lateral.Z, 0, lateral.X).Unit * 2
+                    humanoid:MoveTo(sidestep)
+                    wait(0.35)
+                end
+                break
             end
         end
     end
-end)
+end
+
+spawn(followPlayerLoop)
