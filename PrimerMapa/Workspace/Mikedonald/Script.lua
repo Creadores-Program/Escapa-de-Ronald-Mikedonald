@@ -66,6 +66,8 @@ local function createFootstepSound()
     if template and template:IsA("Sound") then
         local s = template:Clone()
         s.Parent = hrp
+        s.Volume = 1
+        s.Looped = true
         return s
     end
 end
