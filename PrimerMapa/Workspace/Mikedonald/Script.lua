@@ -58,17 +58,20 @@ end
 local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 humanoid.WalkSpeed = 50
-local FOOTSTEP_SOUND_ID = "rbxassetid://15490513000"
-local footstepSound = hrp:FindFirstChild("FootstepSound")
-if not footstepSound then
-    footstepSound = Instance.new("Sound")
-    footstepSound.Name = "FootstepSound"
-    footstepSound.SoundId = FOOTSTEP_SOUND_ID
-    footstepSound.Volume = 1
-    footstepSound.Looped = true
-    footstepSound.PlaybackSpeed = 1
-    footstepSound.Parent = hrp
+
+local function createFootstepSound()
+    local FOOTSTEP_TEMPLATE_NAME = "stepsM"
+    local ServerStorage = game:GetService("ServerStorage")
+    local template = model:FindFirstChild(FOOTSTEP_TEMPLATE_NAME) or ServerStorage:FindFirstChild(FOOTSTEP_TEMPLATE_NAME) or workspace:FindFirstChild(FOOTSTEP_TEMPLATE_NAME)
+    if template and template:IsA("Sound") then
+        local s = template:Clone()
+        s.Parent = hrp
+        return s
+    end
 end
+
+local footstepSound = createFootstepSound()
+
 local runningConn
 runningConn = humanoid.Running:Connect(function(speed)
     if speed and speed > 1 then
