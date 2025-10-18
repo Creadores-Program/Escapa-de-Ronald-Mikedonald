@@ -52,6 +52,19 @@ local function createLobbyUI()
     screenGui.Name = "LobbyUI"
     screenGui.ResetOnSpawn = false
     screenGui.IgnoreGuiInset = true
+
+    local musicName = "FondoM"
+    local music = workspace:FindFirstChild(musicName)
+    if not music then
+        music = game:GetService("ReplicatedStorage"):FindFirstChild(musicName)
+    end
+
+    if music and music:IsA("Sound") then
+        music.Looped = true
+        music:Play()
+    else
+        warn("No se encontró el objeto Sound llamado: " .. musicName .. " o no es un Sound.")
+    end
     
     local background = Instance.new("Frame")
     background.Name = "Background"
@@ -79,7 +92,7 @@ local function createLobbyUI()
     button1.Font = Enum.Font.GothamSemibold
     button1.TextColor3 = Color3.new(1, 1, 1)
     button1.TextScaled = true
-    button1.Text = "Jugar Mapa 1"
+    button1.Text = "Jugar Primer Mapa"
     button1.Parent = background
     
     local button2 = Instance.new("TextButton")
