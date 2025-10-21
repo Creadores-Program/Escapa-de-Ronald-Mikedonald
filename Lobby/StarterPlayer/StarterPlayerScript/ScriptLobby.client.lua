@@ -19,6 +19,13 @@ local function disableInputs()
     ContextActionService:BindAction("BlockAll", function() 
         return Enum.ContextActionResult.Sink 
     end, false, unpack(blockedKeys))
+    local starterGui = game:GetService("StarterGui")
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Movement, false)
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Camera, false)
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
 end
 
 local function hideCharacter(character)
@@ -65,6 +72,9 @@ local function createLobbyUI()
     else
         warn("No se encontró el objeto Sound llamado: " .. musicName .. " o no es un Sound.")
     end
+
+    local logoDecal = workspace:FindFirstChild("LogoGame")
+    local logoId = logoDecal.Texture
     
     local background = Instance.new("Frame")
     background.Name = "Background"
@@ -72,6 +82,16 @@ local function createLobbyUI()
     background.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     background.BorderSizePixel = 0
     background.Parent = screenGui
+
+    if #logoId > 0 then
+        local logo = Instance.new("ImageLabel")
+        logo.Name = "GameLogo"
+        logo.Size = UDim2.new(0.3, 0, 0.3, 0)
+        logo.Position = UDim2.new(0.35, 0, 0.25, 0)
+        logo.BackgroundTransparency = 1
+        logo.Image = logoId
+        logo.Parent = background
+    end
     
     local title = Instance.new("TextLabel")
     title.Name = "Title"
@@ -103,7 +123,7 @@ local function createLobbyUI()
     button2.Font = Enum.Font.GothamSemibold
     button2.TextColor3 = Color3.new(1, 1, 1)
     button2.TextScaled = true
-    button2.Text = "Jugar Mapa 2"
+    button2.Text = "Jugar La Prisión"
     button2.Parent = background
     
     button1.MouseButton1Click:Connect(function()
@@ -123,6 +143,48 @@ local function setupCamera()
     camera.CFrame = CFrame.new(0, 50, 0) * CFrame.Angles(-math.rad(90), 0, 0)
 end
 
+local function createSplash(logoId1, logoId2){
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "SplashScreen"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    local background = Instance.new("Frame")
+    background.Name = "Background"
+    background.Size = UDim2.new(1, 0, 1, 0)
+    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    background.BorderSizePixel = 0
+    background.Parent = screenGui
+    local imageDisplay = Instance.new("ImageLabel")
+    imageDisplay.Name = "LogoGroups"
+    imageDisplay.Size = UDim2.new(0.4, 0, 0.4, 0)
+    imageDisplay.Position = UDim2.new(0.3, 0, 0.3, 0)
+    imageDisplay.BackgroundTransparency = 1 
+    imageDisplay.ScaleType = Enum.ScaleType.Fit
+    imageDisplay.Parent = background
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+    imageDisplay.Image = logo1Id
+    imageDisplay.ImageTransparency = 0
+    durationPerLogo = 3
+    task.wait(durationPerLogo)
+    for i = 0, 1, 0.1 do
+        imageDisplay.ImageTransparency = i
+        task.wait(0.05)
+    end
+    imageDisplay.Image = logo2Id
+    imageDisplay.ImageTransparency = 1
+    for i = 1, 0, -0.1 do
+        imageDisplay.ImageTransparency = i
+        task.wait(0.05)
+    end
+    task.wait(durationPerLogo)
+    for i = 0, 1, 0.1 do
+        imageDisplay.ImageTransparency = i
+        background.BackgroundTransparency = i
+        task.wait(0.05)
+    end
+    screenGui:Destroy()
+}
+
 local function init()
     if player.Character then
         hideCharacter(player.Character)
@@ -131,6 +193,7 @@ local function init()
     
     disableInputs()
     setupCamera()
+    createSplash(logoPinguin, logoCreaPro)
     createLobbyUI()
 end
 
