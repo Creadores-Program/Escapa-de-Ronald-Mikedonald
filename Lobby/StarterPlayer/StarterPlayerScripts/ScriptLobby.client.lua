@@ -143,7 +143,7 @@ local function setupCamera()
     camera.CFrame = CFrame.new(0, 50, 0) * CFrame.Angles(-math.rad(90), 0, 0)
 end
 
-local function createSplash(logoId1, logoId2){
+local function createSplash(logoId1, logoId2)
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "SplashScreen"
     screenGui.ResetOnSpawn = false
