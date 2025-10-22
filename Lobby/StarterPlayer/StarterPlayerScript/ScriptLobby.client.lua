@@ -190,9 +190,12 @@ local function init()
         hideCharacter(player.Character)
     end
     player.CharacterAdded:Connect(hideCharacter)
-    
     disableInputs()
     setupCamera()
+    local logoPinguiDecal = workspace:FindFirstChild("LogoPinguin")
+    local logoPinguin = logoPinguiDecal.Texture
+    local logoCreaProDecal = workspace:FindFirstChild("LogoCreaPro")
+    local logoCreaPro = logoCreaProDecal.Texture
     createSplash(logoPinguin, logoCreaPro)
     createLobbyUI()
 end
