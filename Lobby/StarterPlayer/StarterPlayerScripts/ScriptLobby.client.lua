@@ -20,12 +20,10 @@ local function disableInputs()
         return Enum.ContextActionResult.Sink 
     end, false, unpack(blockedKeys))
     local starterGui = game:GetService("StarterGui")
-    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Movement, false)
-    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Camera, false)
-    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
-    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
-    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
-    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
+    pcall(function() starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Movement, false) end)
+    pcall(function() starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Camera, false) end)
+    pcall(function() starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false) end)
+    pcall(function() starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true) end)
 end
 
 local function hideCharacter(character)
@@ -183,7 +181,7 @@ local function createSplash(logoId1, logoId2)
         task.wait(0.05)
     end
     screenGui:Destroy()
-}
+end
 
 local function init()
     if player.Character then
