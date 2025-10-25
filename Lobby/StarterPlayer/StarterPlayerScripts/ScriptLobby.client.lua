@@ -158,7 +158,7 @@ local function createSplash(logoId1, logoId2)
 
     local fullImage = Instance.new("ImageLabel")
     fullImage.Name = "FullImage"
-    fullImage.Size = UDim2.new(0.6, 0, 0.6, 0)
+    fullImage.Size = UDim2.new(0.8, 0, 0.8, 0)
     fullImage.Position = UDim2.new(0.5, 0, 0.37, 0)
     fullImage.AnchorPoint = Vector2.new(0.5, 0.5)
     fullImage.BackgroundTransparency = 1
