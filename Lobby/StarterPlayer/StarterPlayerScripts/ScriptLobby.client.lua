@@ -158,22 +158,23 @@ local function createSplash(logoId1, logoId2)
 
     local fullImage = Instance.new("ImageLabel")
     fullImage.Name = "FullImage"
-    fullImage.Size = UDim2.new(1, 0, 1, 0)
-    fullImage.Position = UDim2.new(0, 0, 0, 0)
+    fullImage.Size = UDim2.new(0.6, 0, 0.6, 0)
+    fullImage.Position = UDim2.new(0.5, 0, 0.37, 0)
+    fullImage.AnchorPoint = Vector2.new(0.5, 0.5)
     fullImage.BackgroundTransparency = 1
-    fullImage.ScaleType = Enum.ScaleType.Crop
+    fullImage.ScaleType = Enum.ScaleType.Fit
     fullImage.Image = logoId1 or ""
     fullImage.ImageTransparency = 1
     fullImage.Parent = bg
 
     local presenta = Instance.new("TextLabel")
     presenta.Name = "Presenta"
-    presenta.Size = UDim2.new(0.4, 0, 0, 36)
-    presenta.Position = UDim2.new(0.5, 0, 0.8, 0)
+    presenta.Size = UDim2.new(0.5, 0, 0, 36)
+    presenta.Position = UDim2.new(0.5, 0, 0.82, 0)
     presenta.AnchorPoint = Vector2.new(0.5, 0)
     presenta.BackgroundTransparency = 1
     presenta.Text = "PRESENTA"
-    presenta.TextColor3 = Color3.fromRGB(0, 1, 0)
+    presenta.TextColor3 = Color3.fromRGB(0, 255, 0)
     presenta.Font = Enum.Font.GothamBold
     presenta.TextScaled = true
     presenta.TextTransparency = 1
@@ -181,43 +182,24 @@ local function createSplash(logoId1, logoId2)
 
     local centerContainer = Instance.new("Frame")
     centerContainer.Name = "CenterContainer"
-    centerContainer.Size = UDim2.new(0.9, 0, 0.4, 0)
-    centerContainer.Position = UDim2.new(0.05, 0, 0.28, 0)
+    centerContainer.Size = UDim2.new(0.9, 0, 0.12, 0)
+    centerContainer.Position = UDim2.new(0.05, 0, 0.55, 0)
     centerContainer.BackgroundTransparency = 1
     centerContainer.Parent = bg
     centerContainer.Visible = false
 
-    local leftLogo = Instance.new("ImageLabel")
-    leftLogo.Name = "LeftLogo"
-    leftLogo.Size = UDim2.new(0.4, 0, 1, 0)
-    leftLogo.Position = UDim2.new(0, 0, 0, 0)
-    leftLogo.BackgroundTransparency = 1
-    leftLogo.Image = logoId1 or ""
-    leftLogo.ImageTransparency = 1
-    leftLogo.Parent = centerContainer
-    leftLogo.ScaleType = Enum.ScaleType.Fit
-
     local midText = Instance.new("TextLabel")
     midText.Name = "MidText"
-    midText.Size = UDim2.new(0.2, 0, 1, 0)
-    midText.Position = UDim2.new(0.4, 0, 0, 0)
+    midText.Size = UDim2.new(1, 0, 1, 0)
+    midText.Position = UDim2.new(0, 0, 0, 0)
     midText.BackgroundTransparency = 1
     midText.Text = "EN COLABORACIÓN CON"
     midText.TextColor3 = Color3.fromRGB(173, 216, 230)
     midText.Font = Enum.Font.Gotham
     midText.TextScaled = true
     midText.TextTransparency = 1
+    midText.TextStrokeTransparency = 0.8
     midText.Parent = centerContainer
-
-    local rightLogo = Instance.new("ImageLabel")
-    rightLogo.Name = "RightLogo"
-    rightLogo.Size = UDim2.new(0.4, 0, 1, 0)
-    rightLogo.Position = UDim2.new(0.6, 0, 0, 0)
-    rightLogo.BackgroundTransparency = 1
-    rightLogo.Image = logoId2 or ""
-    rightLogo.ImageTransparency = 1
-    rightLogo.Parent = centerContainer
-    rightLogo.ScaleType = Enum.ScaleType.Fit
 
     local function fadeInImage(img, duration)
         duration = duration or 0.6
@@ -254,18 +236,13 @@ local function createSplash(logoId1, logoId2)
     fullImage.Image = logoId1 or ""
     fadeInImage(fullImage, 0.6)
     fadeText(presenta, 0, 0.6)
-    fadeText(presenta, 0, 0)
     task.wait(durationFull)
 
     centerContainer.Visible = true
     fadeOutImage(fullImage, 0.4)
-    fadeInImage(leftLogo, 0.5)
-    fadeInImage(rightLogo, 0.5)
     fadeText(midText, 0, 0.5)
     task.wait(durationMiddle)
 
-    fadeOutImage(leftLogo, 0.4)
-    fadeOutImage(rightLogo, 0.4)
     fadeText(midText, 1, 0.4)
     centerContainer.Visible = false
 
